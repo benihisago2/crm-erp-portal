@@ -4,6 +4,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -27,51 +29,56 @@ import { useIsMobile } from "@/hooks/useMobile";
 import {
   Bell,
   Building2,
-  CheckSquare,
+  CalendarCheck,
+  CheckCircle2,
   ChevronDown,
-  Command,
-  ContactRound,
+  CircleDot,
+  FileSpreadsheet,
   Handshake,
+  HelpCircle,
+  Layers,
   LayoutDashboard,
   LogOut,
-  PanelLeft,
-  ReceiptText,
-  Settings2,
-  UsersRound,
+  Receipt,
+  Search,
+  Settings,
+  Sparkles,
+  User,
+  Users,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 
-const menuGroups = [
+const navigationSections = [
   {
-    label: "WORKSPACE",
+    title: "ワークスペース",
     items: [
-      { icon: LayoutDashboard, label: "オーバービュー", path: "/" },
-      { icon: CheckSquare, label: "フォローアップ", path: "/work" },
+      { icon: LayoutDashboard, label: "ダッシュボード", path: "/" },
+      { icon: CalendarCheck, label: "タスク・活動管理", path: "/work" },
     ],
   },
   {
-    label: "CRM",
+    title: "CRM（顧客関係管理）",
     items: [
-      { icon: Building2, label: "顧客アカウント", path: "/crm/companies" },
-      { icon: ContactRound, label: "連絡先", path: "/crm/contacts" },
+      { icon: Building2, label: "顧客企業一覧", path: "/crm/companies" },
+      { icon: Users, label: "取引先担当者", path: "/crm/contacts" },
       { icon: Handshake, label: "商談パイプライン", path: "/crm/deals" },
     ],
   },
   {
-    label: "OPERATIONS",
+    title: "ERP（販売・請求管理）",
     items: [
-      { icon: ReceiptText, label: "販売業務", path: "/sales" },
+      { icon: Receipt, label: "販売・請求管理", path: "/sales" },
       { icon: Bell, label: "通知センター", path: "/notifications" },
     ],
   },
 ];
 
-const SIDEBAR_WIDTH_KEY = "sidebar-width";
-const DEFAULT_WIDTH = 256;
-const MIN_WIDTH = 208;
-const MAX_WIDTH = 420;
+const SIDEBAR_WIDTH_KEY = "nexaflow-sidebar-width";
+const DEFAULT_WIDTH = 270;
+const MIN_WIDTH = 220;
+const MAX_WIDTH = 400;
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
@@ -93,7 +100,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 }
 
-type DashboardLayoutContentProps = { children: React.ReactNode; setSidebarWidth: (width: number) => void };
+type DashboardLayoutContentProps = {
+  children: React.ReactNode;
+  setSidebarWidth: (width: number) => void;
+};
 
 function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
@@ -133,42 +143,88 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
   return (
     <>
       <div className="relative" ref={sidebarRef}>
-        <Sidebar collapsible="icon" className="border-r border-white/[0.09]" disableTransition={isResizing}>
-          <SidebarHeader className="h-[74px] justify-center border-b border-white/[0.08] px-3">
+        <Sidebar collapsible="icon" className="border-r border-white/[0.08] bg-[#0f1118]" disableTransition={isResizing}>
+          {/* Material 3 App Header */}
+          <SidebarHeader className="h-16 justify-center border-b border-white/[0.06] px-3.5">
             <div className="flex w-full items-center gap-3">
-              <button onClick={toggleSidebar} className="grid size-9 shrink-0 place-items-center rounded-md border border-cyan-300/30 bg-cyan-300/10 text-cyan-200 transition hover:border-cyan-200/60 hover:bg-cyan-300/15" aria-label="サイドバーを切り替え">
-                <Command className="size-4" />
+              <button
+                onClick={toggleSidebar}
+                className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary transition-all hover:bg-primary/20 hover:scale-105"
+                aria-label="メニューを開閉"
+                title="メニューを開閉"
+              >
+                <Layers className="size-4.5" />
               </button>
               {!isCollapsed && (
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[11px] font-bold tracking-[0.28em] text-white">NEXAFLOW</span>
-                    <span className="font-mono text-[9px] text-fuchsia-300">v0.9</span>
+                    <span className="font-sans text-sm font-semibold tracking-tight text-white">NexaFlow</span>
+                    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">ERP/CRM</span>
                   </div>
-                  <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white/35">CRM / ERP SYSTEM</div>
+                  <p className="truncate text-[11px] text-muted-foreground">統合基幹業務ポータル</p>
                 </div>
               )}
             </div>
           </SidebarHeader>
-          <SidebarContent className="gap-0 px-2 py-3">
-            <div className="mb-3 flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-3 py-2 text-white/45">
-              <span className="font-mono text-xs">⌕</span>
-              {!isCollapsed && <span className="flex-1 font-mono text-[10px] uppercase tracking-[0.13em]">クイック検索</span>}
-              {!isCollapsed && <kbd className="font-mono text-[9px] text-cyan-200/60">⌘ K</kbd>}
-            </div>
-            {menuGroups.map(group => (
-              <SidebarGroup key={group.label} className="px-0 py-2">
-                {!isCollapsed && <SidebarGroupLabel className="px-3 font-mono text-[9px] tracking-[0.22em] text-white/30">{group.label}</SidebarGroupLabel>}
+
+          <SidebarContent className="gap-1 px-2.5 py-3">
+            {/* M3 Quick Search Button */}
+            {!isCollapsed ? (
+              <button
+                onClick={() => {
+                  const event = new KeyboardEvent("keydown", { key: "k", metaKey: true });
+                  window.dispatchEvent(event);
+                }}
+                className="mb-3 flex h-10 w-full items-center gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 text-xs text-muted-foreground transition-all hover:border-primary/40 hover:bg-white/[0.06] hover:text-white"
+              >
+                <Search className="size-3.5 text-primary" />
+                <span className="flex-1 text-left">統合検索...</span>
+                <kbd className="rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
+                  ⌘K
+                </kbd>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  const event = new KeyboardEvent("keydown", { key: "k", metaKey: true });
+                  window.dispatchEvent(event);
+                }}
+                className="mb-3 mx-auto grid size-9 place-items-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06] hover:text-white"
+                title="クイック検索 (⌘K)"
+              >
+                <Search className="size-4" />
+              </button>
+            )}
+
+            {/* Navigation Groups */}
+            {navigationSections.map((section) => (
+              <SidebarGroup key={section.title} className="px-0 py-1.5">
+                {!isCollapsed && (
+                  <SidebarGroupLabel className="px-3 text-[11px] font-medium text-muted-foreground/80 tracking-normal">
+                    {section.title}
+                  </SidebarGroupLabel>
+                )}
                 <SidebarGroupContent>
-                  <SidebarMenu>
-                    {group.items.map(item => {
-                      const active = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+                  <SidebarMenu className="gap-1">
+                    {section.items.map((item) => {
+                      const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
                       return (
                         <SidebarMenuItem key={item.path}>
-                          <SidebarMenuButton isActive={active} onClick={() => setLocation(item.path)} tooltip={item.label} className="h-10 rounded-md font-sans text-[13px] text-white/60 transition data-[active=true]:border data-[active=true]:border-cyan-200/25 data-[active=true]:bg-cyan-300/10 data-[active=true]:text-cyan-100 hover:bg-white/[0.05] hover:text-white">
-                            <item.icon className="size-[15px] shrink-0" />
+                          <SidebarMenuButton
+                            isActive={isActive}
+                            onClick={() => setLocation(item.path)}
+                            tooltip={item.label}
+                            className={`h-10 rounded-xl px-3 text-sm font-medium transition-all ${
+                              isActive
+                                ? "bg-primary/15 text-primary font-semibold shadow-xs"
+                                : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground"
+                            }`}
+                          >
+                            <item.icon className={`size-[18px] shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
                             <span>{item.label}</span>
-                            {active && !isCollapsed && <span className="ml-auto size-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_#35f1ff]" />}
+                            {isActive && !isCollapsed && (
+                              <span className="ml-auto size-1.5 rounded-full bg-primary" />
+                            )}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
@@ -177,44 +233,116 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
                 </SidebarGroupContent>
               </SidebarGroup>
             ))}
-            <SidebarGroup className="mt-auto px-0 py-2">
+
+            {/* Settings section */}
+            <SidebarGroup className="mt-auto px-0 py-1.5">
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton isActive={location === "/settings"} onClick={() => setLocation("/settings")} tooltip="システム設定" className="h-10 rounded-md font-sans text-[13px] text-white/45 hover:bg-white/[0.05] hover:text-white">
-                      <Settings2 className="size-[15px]" /><span>システム設定</span>
+                    <SidebarMenuButton
+                      isActive={location === "/settings"}
+                      onClick={() => setLocation("/settings")}
+                      tooltip="システム設定"
+                      className={`h-10 rounded-xl px-3 text-sm font-medium transition-all ${
+                        location === "/settings"
+                          ? "bg-primary/15 text-primary font-semibold"
+                          : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground"
+                      }`}
+                    >
+                      <Settings className={`size-[18px] shrink-0 ${location === "/settings" ? "text-primary" : "text-muted-foreground"}`} />
+                      <span>システム設定</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
-          <SidebarFooter className="border-t border-white/[0.08] p-2">
+
+          {/* User Profile / Status Footer */}
+          <SidebarFooter className="border-t border-white/[0.06] p-2.5">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition hover:bg-white/[0.06] group-data-[collapsible=icon]:justify-center" aria-label="ユーザーメニュー">
-                    <Avatar className="size-8 border border-fuchsia-300/40 bg-fuchsia-300/10"><AvatarFallback className="bg-transparent font-mono text-xs text-fuchsia-100">{user.name?.charAt(0).toUpperCase() || "N"}</AvatarFallback></Avatar>
-                    {!isCollapsed && <div className="min-w-0 flex-1"><p className="truncate text-xs font-medium text-white/80">{user.name || "オペレーター"}</p><p className="mt-0.5 truncate font-mono text-[9px] text-white/35">{user.email || "session.active"}</p></div>}
-                    {!isCollapsed && <ChevronDown className="size-3 text-white/35" />}
+                  <button
+                    className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-white/[0.06] group-data-[collapsible=icon]:justify-center"
+                    aria-label="ユーザーアカウントメニュー"
+                  >
+                    <Avatar className="size-8.5 rounded-xl border border-primary/20 bg-primary/10">
+                      <AvatarFallback className="rounded-xl bg-transparent text-xs font-semibold text-primary">
+                        {user.name?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    {!isCollapsed && (
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-semibold text-foreground">{user.name || "システム担当者"}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{user.email || "ログイン中"}</p>
+                      </div>
+                    )}
+                    {!isCollapsed && <ChevronDown className="size-3.5 text-muted-foreground" />}
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="border-white/10 bg-[#11131b] text-white/80">
-                  <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-200 focus:bg-red-400/10 focus:text-red-100"><LogOut className="mr-2 size-4" />ログアウト</DropdownMenuItem>
+                <DropdownMenuContent align="start" className="w-56 rounded-xl border border-white/[0.1] bg-[#1a1d27] p-1.5 shadow-xl">
+                  <DropdownMenuLabel className="px-2.5 py-1.5 text-xs text-muted-foreground">
+                    アカウント情報
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-white/[0.08]" />
+                  <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer rounded-lg px-2.5 py-2 text-xs">
+                    <User className="mr-2 size-4 text-muted-foreground" />
+                    ユーザープロファイル
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => logout()} className="cursor-pointer rounded-lg px-2.5 py-2 text-xs text-red-400 focus:bg-red-500/10 focus:text-red-300">
+                    <LogOut className="mr-2 size-4" />
+                    ログアウト
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <button onClick={() => startLogin()} className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-white/50 transition hover:bg-white/[0.06] hover:text-white group-data-[collapsible=icon]:justify-center" aria-label="ログイン">
-                <Avatar className="size-8 border border-white/15 bg-white/5"><AvatarFallback className="bg-transparent font-mono text-xs text-white/65">NF</AvatarFallback></Avatar>
-                {!isCollapsed && <div><p className="text-xs text-white/70">ゲストセッション</p><p className="font-mono text-[9px] text-cyan-200/50">サインイン →</p></div>}
+              <button
+                onClick={() => startLogin()}
+                className="flex w-full items-center gap-3 rounded-xl p-2 text-left text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground group-data-[collapsible=icon]:justify-center"
+                aria-label="ログイン"
+              >
+                <Avatar className="size-8.5 rounded-xl border border-white/10 bg-white/[0.05]">
+                  <AvatarFallback className="rounded-xl bg-transparent text-xs text-muted-foreground">NF</AvatarFallback>
+                </Avatar>
+                {!isCollapsed && (
+                  <div>
+                    <p className="text-xs font-medium text-foreground">ゲスト閲覧中</p>
+                    <p className="text-[11px] text-primary">サインインして全機能を利用 →</p>
+                  </div>
+                )}
               </button>
             )}
           </SidebarFooter>
         </Sidebar>
-        <div className={`absolute right-0 top-0 z-50 h-full w-1 cursor-col-resize transition-colors hover:bg-cyan-300/30 ${isCollapsed ? "hidden" : ""}`} onMouseDown={() => setIsResizing(true)} />
+
+        {/* Sidebar Resize Handle */}
+        <div
+          className={`absolute right-0 top-0 z-50 h-full w-1 cursor-col-resize transition-colors hover:bg-primary/40 ${
+            isCollapsed ? "hidden" : ""
+          }`}
+          onMouseDown={() => setIsResizing(true)}
+        />
       </div>
-      <SidebarInset className="min-w-0 bg-[#07080d]">
-        {isMobile && <div className="sticky top-0 z-40 flex h-14 items-center border-b border-white/10 bg-[#07080d]/95 px-2 backdrop-blur"><SidebarTrigger className="size-9 text-white/70" /><span className="ml-2 font-mono text-[10px] tracking-[0.2em] text-cyan-200">NEXAFLOW / MOBILE</span></div>}
+
+      <SidebarInset className="min-w-0 bg-[#0c0e14]">
+        {isMobile && (
+          <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-white/[0.08] bg-[#0c0e14]/95 px-3 backdrop-blur-md">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="size-9 rounded-lg hover:bg-white/10" />
+              <span className="font-sans text-sm font-semibold text-white">NexaFlow ERP/CRM</span>
+            </div>
+            <button
+              onClick={() => {
+                const event = new KeyboardEvent("keydown", { key: "k", metaKey: true });
+                window.dispatchEvent(event);
+              }}
+              className="grid size-8 place-items-center rounded-lg bg-white/[0.06] text-muted-foreground"
+            >
+              <Search className="size-4" />
+            </button>
+          </header>
+        )}
         <main className="min-h-screen">{children}</main>
       </SidebarInset>
     </>
