@@ -67,7 +67,17 @@ export async function getUserByOpenId(openId: string) {
 
 export async function getCrmSnapshot() {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    return {
+      companies: [],
+      contacts: [],
+      deals: [],
+      documents: [],
+      tasks: [],
+      activities: [],
+      notifications: [],
+    };
+  }
   const [companies, contacts, deals, documents, tasks, activities, notifications] = await Promise.all([
     db.select().from(crmCompanies),
     db.select().from(crmContacts),
@@ -97,6 +107,13 @@ export async function updateCompany(id: number, input: Partial<typeof crmCompani
   return { success: true as const };
 }
 
+export async function deleteCompany(id: number) {
+  const db = await getDb();
+  if (!db) return { success: false as const, reason: "database-unavailable" };
+  await db.delete(crmCompanies).where(eq(crmCompanies.id, id));
+  return { success: true as const };
+}
+
 export async function listContacts() {
   const db = await getDb();
   return db ? db.select().from(crmContacts) : [];
@@ -111,6 +128,12 @@ export async function updateContact(id: number, input: Partial<typeof crmContact
   const db = await getDb();
   if (!db) return { success: false as const, reason: "database-unavailable" };
   await db.update(crmContacts).set(input).where(eq(crmContacts.id, id));
+  return { success: true as const };
+}
+export async function deleteContact(id: number) {
+  const db = await getDb();
+  if (!db) return { success: false as const, reason: "database-unavailable" };
+  await db.delete(crmContacts).where(eq(crmContacts.id, id));
   return { success: true as const };
 }
 
@@ -130,6 +153,12 @@ export async function updateDeal(id: number, input: Partial<typeof crmDeals.$inf
   await db.update(crmDeals).set(input).where(eq(crmDeals.id, id));
   return { success: true as const };
 }
+export async function deleteDeal(id: number) {
+  const db = await getDb();
+  if (!db) return { success: false as const, reason: "database-unavailable" };
+  await db.delete(crmDeals).where(eq(crmDeals.id, id));
+  return { success: true as const };
+}
 
 export async function listDocuments() {
   const db = await getDb();
@@ -147,6 +176,12 @@ export async function updateDocument(id: number, input: Partial<typeof crmDocume
   await db.update(crmDocuments).set(input).where(eq(crmDocuments.id, id));
   return { success: true as const };
 }
+export async function deleteDocument(id: number) {
+  const db = await getDb();
+  if (!db) return { success: false as const, reason: "database-unavailable" };
+  await db.delete(crmDocuments).where(eq(crmDocuments.id, id));
+  return { success: true as const };
+}
 
 export async function listTasks() {
   const db = await getDb();
@@ -162,6 +197,12 @@ export async function updateTask(id: number, input: Partial<typeof crmTasks.$inf
   const db = await getDb();
   if (!db) return { success: false as const, reason: "database-unavailable" };
   await db.update(crmTasks).set(input).where(eq(crmTasks.id, id));
+  return { success: true as const };
+}
+export async function deleteTask(id: number) {
+  const db = await getDb();
+  if (!db) return { success: false as const, reason: "database-unavailable" };
+  await db.delete(crmTasks).where(eq(crmTasks.id, id));
   return { success: true as const };
 }
 
@@ -184,5 +225,11 @@ export async function markNotificationRead(id: number) {
   const db = await getDb();
   if (!db) return { success: false as const, reason: "database-unavailable" };
   await db.update(crmNotifications).set({ isRead: 1 }).where(eq(crmNotifications.id, id));
+  return { success: true as const };
+}
+export async function markAllNotificationsRead() {
+  const db = await getDb();
+  if (!db) return { success: false as const, reason: "database-unavailable" };
+  await db.update(crmNotifications).set({ isRead: 1 });
   return { success: true as const };
 }

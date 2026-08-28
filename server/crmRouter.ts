@@ -6,6 +6,11 @@ import {
   createDeal,
   createDocument,
   createTask,
+  deleteCompany,
+  deleteContact,
+  deleteDeal,
+  deleteDocument,
+  deleteTask,
   getCrmSnapshot,
   listActivities,
   listCompanies,
@@ -14,6 +19,7 @@ import {
   listDocuments,
   listNotifications,
   listTasks,
+  markAllNotificationsRead,
   markNotificationRead,
   updateCompany,
   updateContact,
@@ -56,6 +62,7 @@ export const crmRouter = router({
       const { id, ...values } = input;
       return updateCompany(id, values);
     }),
+    delete: protectedProcedure.input(idInput).mutation(({ input }) => deleteCompany(input.id)),
   }),
   contacts: router({
     list: protectedProcedure.query(() => listContacts()),
@@ -64,6 +71,7 @@ export const crmRouter = router({
       const { id, ...values } = input;
       return updateContact(id, values);
     }),
+    delete: protectedProcedure.input(idInput).mutation(({ input }) => deleteContact(input.id)),
   }),
   deals: router({
     list: protectedProcedure.query(() => listDeals()),
@@ -72,6 +80,7 @@ export const crmRouter = router({
       const { id, ...values } = input;
       return updateDeal(id, values);
     }),
+    delete: protectedProcedure.input(idInput).mutation(({ input }) => deleteDeal(input.id)),
   }),
   documents: router({
     list: protectedProcedure.query(() => listDocuments()),
@@ -80,6 +89,7 @@ export const crmRouter = router({
       const { id, ...values } = input;
       return updateDocument(id, values);
     }),
+    delete: protectedProcedure.input(idInput).mutation(({ input }) => deleteDocument(input.id)),
   }),
   tasks: router({
     list: protectedProcedure.query(() => listTasks()),
@@ -88,6 +98,7 @@ export const crmRouter = router({
       const { id, ...values } = input;
       return updateTask(id, values);
     }),
+    delete: protectedProcedure.input(idInput).mutation(({ input }) => deleteTask(input.id)),
   }),
   activities: router({
     list: protectedProcedure.query(() => listActivities()),
@@ -99,5 +110,6 @@ export const crmRouter = router({
   notifications: router({
     list: protectedProcedure.query(() => listNotifications()),
     markRead: protectedProcedure.input(idInput).mutation(({ input }) => markNotificationRead(input.id)),
+    markAllRead: protectedProcedure.mutation(() => markAllNotificationsRead()),
   }),
 });
